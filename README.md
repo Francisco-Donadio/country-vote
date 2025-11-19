@@ -2,6 +2,11 @@
 
 A modern, accessible React application for voting on favorite countries with real-time rankings display. Built with TypeScript, React 19, and Tailwind CSS.
 
+## 🌐 Live Demo
+
+**Frontend**: [https://country-vote.onrender.com](https://country-vote.onrender.com)  
+**Backend API**: [https://country-vote-api.onrender.com/api](https://country-vote-api.onrender.com/api)
+
 ## ✨ Features
 
 - 🗳️ **Interactive Voting Form** with real-time validation
@@ -58,7 +63,11 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
+# For local development with local backend
 VITE_API_URL=http://localhost:3000/api
+
+# Or to use the production API
+# VITE_API_URL=https://country-vote-api.onrender.com/api
 ```
 
 ### 3. Start Development Server
@@ -96,28 +105,28 @@ The frontend communicates with a NestJS backend. Required endpoints:
 
 ```http
 GET /api/countries
-Response: { data: Country[] }
+  Response: { data: Country[] }
 ```
 
 ### Get Top Countries
 
 ```http
 GET /api/votes/top
-Response: { data: CountryVote[] }
+  Response: { data: CountryVote[] }
 ```
 
 ### Submit Vote
 
 ```http
 POST /api/votes
-Body: { name: string, email: string, country: string }
+  Body: { name: string, email: string, country: string }
 ```
 
 ### Search Countries
 
 ```http
 GET /api/votes/search?q={query}
-Response: { data: CountryVote[] }
+  Response: { data: CountryVote[] }
 ```
 
 See [types.ts](./src/types.ts) for complete type definitions.
@@ -290,20 +299,49 @@ Built with accessibility as a priority:
 npm run build
 ```
 
-Output in `dist/` folder. Serve with any static hosting:
+Output in `dist/` folder (configured in `vite.config.ts`).
 
-- **Vercel** - Zero config deployment
-- **Netlify** - Automatic builds
-- **AWS S3 + CloudFront** - Scalable hosting
-- **Nginx** - Traditional server
+### Deploy to Render
+
+1. **Connect your GitHub repository** to Render
+2. **Create a new Static Site**
+3. **Configure settings in the dashboard:**
+
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+   - **Node Version**: `20` (or higher)
+
+4. **Add Environment Variables:**
+
+   - `VITE_API_URL`: `https://country-vote-api.onrender.com/api`
+
+5. **Optional - SPA Routing Setup:**
+
+   If you add React Router later, configure redirects in the dashboard:
+
+   - Go to **Redirects/Rewrites**
+   - **Source**: `/*`
+   - **Destination**: `/index.html`
+   - **Type**: Rewrite
+
+That's it! Render will auto-deploy on every push to your main branch.
+
+### Other Hosting Options
+
+- **Vercel** - Zero config deployment, automatic builds
+- **Netlify** - Great DX, instant rollbacks
+- **AWS S3 + CloudFront** - Scalable, cost-effective
+- **Nginx** - Traditional server hosting
 
 ### Environment Variables
 
-For production, set:
+For production, set in your hosting platform:
 
 ```env
-VITE_API_URL=https://your-api-domain.com/api
+VITE_API_URL=https://country-vote-api.onrender.com/api
 ```
+
+**Important**: Vite injects env vars at **build time**, not runtime. Rebuild when changing `VITE_*` variables.
 
 ## 📊 Bundle Size
 
@@ -365,6 +403,27 @@ npm install
 npm run build
 ```
 
+### Render: "Publish directory does not exist"
+
+**Problem**: Render can't find the build output
+
+**Solution**:
+
+1. Ensure **Publish Directory** is set to `dist` (not `build`)
+2. Check that build command is: `npm install && npm run build`
+3. Verify `vite.config.ts` has `outDir: 'dist'`
+
+### Render: Environment Variables Not Working
+
+**Problem**: `VITE_API_URL` not being replaced
+
+**Solution**:
+
+1. Ensure variable starts with `VITE_` prefix
+2. Remember: Vite injects at **build time**
+3. After changing env vars in Render, **trigger a rebuild**
+4. Variables must be set **before** the build runs
+
 ## 📚 Learning Resources
 
 - [React Documentation](https://react.dev)
@@ -392,7 +451,9 @@ MIT
 
 **Related Projects:**
 
-- Backend API: [country-vote-api](https://github.com/Francisco-Donadio/country-vote-api)
+- Backend API Repository: [country-vote-api](https://github.com/Francisco-Donadio/country-vote-api)
+- Live Frontend: [https://country-vote.onrender.com](https://country-vote.onrender.com)
+- Live API: [https://country-vote-api.onrender.com/api](https://country-vote-api.onrender.com/api)
 
 **Documentation:**
 
