@@ -3,6 +3,8 @@ import * as Select from "@radix-ui/react-select";
 import type { Country, VoteSubmission } from "../types";
 import { api } from "../api/service";
 import { ChevronDownIcon, CheckIcon } from "./Icons";
+import { voteSubmissionSchema } from "../schemas/vote.schema";
+import { ZodError } from "zod";
 
 interface VotingFormProps {
   onVoteSubmitted: () => void;
@@ -15,7 +17,9 @@ export const VotingForm = ({ onVoteSubmitted }: VotingFormProps) => {
     email: "",
     country: "",
   });
-  const [errors, setErrors] = useState<Partial<VoteSubmission>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof VoteSubmission, string>>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -34,24 +38,22 @@ export const VotingForm = ({ onVoteSubmitted }: VotingFormProps) => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<VoteSubmission> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+    try {
+      voteSubmissionSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors: Partial<Record<keyof VoteSubmission, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as keyof VoteSubmission] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
     }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (!formData.country) {
-      newErrors.country = "Please select a country";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: FormEvent) => {
